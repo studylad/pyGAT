@@ -120,7 +120,7 @@ best_epoch = 0
 for epoch in range(args.epochs):
     loss_values.append(train(epoch))
 
-    torch.save(model.state_dict(), '{}.pkl'.format(epoch))
+    torch.save(model.state_dict(), f'{epoch}.pkl')
     if loss_values[-1] < best:
         best = loss_values[-1]
         best_epoch = epoch
@@ -147,8 +147,8 @@ print("Optimization Finished!")
 print("Total time elapsed: {:.4f}s".format(time.time() - t_total))
 
 # Restore best model
-print('Loading {}th epoch'.format(best_epoch))
-model.load_state_dict(torch.load('{}.pkl'.format(best_epoch)))
+print(f'Loading {best_epoch}th epoch')
+model.load_state_dict(torch.load(f'{best_epoch}.pkl'))
 
 # Testing
 compute_test()

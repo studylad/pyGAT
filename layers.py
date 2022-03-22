@@ -33,10 +33,7 @@ class GraphAttentionLayer(nn.Module):
         attention = F.dropout(attention, self.dropout, training=self.training)
         h_prime = torch.matmul(attention, Wh)
 
-        if self.concat:
-            return F.elu(h_prime)
-        else:
-            return h_prime
+        return F.elu(h_prime) if self.concat else h_prime
 
     def _prepare_attentional_mechanism_input(self, Wh):
         # Wh.shape (N, out_feature)
@@ -50,7 +47,11 @@ class GraphAttentionLayer(nn.Module):
         return self.leakyrelu(e)
 
     def __repr__(self):
-        return self.__class__.__name__ + ' (' + str(self.in_features) + ' -> ' + str(self.out_features) + ')'
+        return (
+            f'{self.__class__.__name__} ({str(self.in_features)} -> '
+            + str(self.out_features)
+            + ')'
+        )
 
 
 class SpecialSpmmFunction(torch.autograd.Function):
@@ -130,17 +131,16 @@ class SpGraphAttentionLayer(nn.Module):
         h_prime = self.special_spmm(edge, edge_e, torch.Size([N, N]), h)
         assert not torch.isnan(h_prime).any()
         # h_prime: N x out
-        
+
         h_prime = h_prime.div(e_rowsum)
         # h_prime: N x out
         assert not torch.isnan(h_prime).any()
 
-        if self.concat:
-            # if this layer is not last layer,
-            return F.elu(h_prime)
-        else:
-            # if this layer is last layer,
-            return h_prime
+        return F.elu(h_prime) if self.concat else h_prime
 
     def __repr__(self):
-        return self.__class__.__name__ + ' (' + str(self.in_features) + ' -> ' + str(self.out_features) + ')'
+        return (
+            f'{self.__class__.__name__} ({str(self.in_features)} -> '
+            + str(self.out_features)
+            + ')'
+        )
